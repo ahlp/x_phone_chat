@@ -1,4 +1,4 @@
-package com.example.arthurpires.x_phone_chat
+package com.arthurpires.x_phone_chat
 
 import org.junit.Test
 
