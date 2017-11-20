@@ -34,10 +34,10 @@ class MainActivity : AppCompatActivity() {
 
         thread {
 
-            val sub: Subscriber = Subscriber({ msg: String -> addMsgToChat(msg) })
-            while (true) {
-                queueProxy!!.receive(sub)
-            }
+            val sub: Subscriber = Subscriber({ msg -> addMsgToChat(msg) })
+
+            queueProxy!!.receive(sub)
+
         }
 
 //        thread {
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
 //        }
     }
 
-    fun addMsgToChat(msg: String): Any {
+    fun addMsgToChat(msg: String) {
         if(!msg.equals("")){
             runOnUiThread({
                 val newMsg = TextView(chatView!!.context)
@@ -55,7 +55,6 @@ class MainActivity : AppCompatActivity() {
                 chatView!!.addView(newMsg)
             })
         }
-        return !msg.equals("")
     }
 
     fun onSendButtonClick(view: View) {

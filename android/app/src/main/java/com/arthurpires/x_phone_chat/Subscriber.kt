@@ -7,9 +7,9 @@ import com.hnkalhp.momServer.ISubscriber
  */
 class Subscriber : ISubscriber {
 
-    var lambda: (var1: String) -> Any
+    var lambda: (String) -> Unit
 
-    constructor(lambda: (var1: String) -> Any) {
+    constructor(lambda: (String) -> Unit) {
         this.lambda = lambda
     }
 
