@@ -6,8 +6,6 @@ import android.view.View
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
-import com.hnkalhp.momServer.QueueInvoker
-import com.hnkalhp.momServer.QueueManager
 import com.hnkalhp.momServer.QueueManagerProxy
 import kotlin.concurrent.thread
 
@@ -21,51 +19,57 @@ class MainActivity : AppCompatActivity() {
     var chatView: LinearLayout? = null
 
     var queueProxy: QueueManagerProxy? = null
+    var publisher: QueueManagerProxy? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         this.queueProxy = QueueManagerProxy(DEFAULT_TOPIC)
+        this.publisher = QueueManagerProxy(DEFAULT_TOPIC)
 
         this.publishTextField = findViewById(R.id.publishTextField)
         this.topicTextField = findViewById(R.id.topicTextField)
         this.chatView = findViewById(R.id.ChatView)
 
         thread {
-            Thread.sleep(1000)
+
+            val sub: Subscriber = Subscriber({ msg: String -> addMsgToChat(msg) })
             while (true) {
-                // listen topic
-                val newText = queueProxy!!.receive(0)
-                Thread.sleep(1000)
-                if(!newText.equals("")){
-                    runOnUiThread({
-                        val newMsg = TextView(chatView!!.context)
-                        newMsg.setText(newText)
-                        chatView!!.addView(newMsg)
-                    })
-                }
+                queueProxy!!.receive(sub)
             }
         }
 
-        thread {
-            val invoker = QueueInvoker()
-            val manager = QueueManager()
-            invoker.invoke(manager, 3000)
+//        thread {
+//            val invoker = QueueInvoker()
+//            val manager = QueueManager()
+//            invoker.invoke(manager, 3000)
+//        }
+    }
+
+    fun addMsgToChat(msg: String): Any {
+        if(!msg.equals("")){
+            runOnUiThread({
+                val newMsg = TextView(chatView!!.context)
+                newMsg.setText(msg)
+                chatView!!.addView(newMsg)
+            })
         }
+        return !msg.equals("")
     }
 
     fun onSendButtonClick(view: View) {
         val publishText = publishTextField!!.getText().toString()
         publishTextField!!.setText("")
         thread {
-            this.queueProxy!!.send(publishText)
+            this.publisher!!.send(publishText)
         }
     }
 
     fun onChangeRoomClick(view: View) {
         val topic = topicTextField!!.text.toString()
         this.queueProxy = QueueManagerProxy(topic)
+        this.publisher = QueueManagerProxy(topic)
         runOnUiThread({
             chatView!!.removeAllViews()
         })
